@@ -1,0 +1,41 @@
+language: cpp
+compiler:
+  - clang
+  
+os:
+  - osx
+
+addons:
+  homebrew:
+    packages:
+    - llvm@13
+    - molten-vk
+    - vulkan-headers
+    - sdl2
+    - nasm
+    - qt@5
+    - ninja
+    - cmake
+    - glew
+    - git
+    
+before_install:
+  - export CXX=clang++
+  - export CC=clang
+  - export Qt5_DIR="/usr/local/opt/qt@5/lib/cmake/Qt5"
+  - export PATH="/usr/local/opt/llvm/bin:/usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin:/Library/Apple/usr/bin"
+  - export LDFLAGS="-L/usr/local/opt/llvm/lib -Wl,-rpath,/usr/local/opt/llvm/lib"
+  - export CXXFLAGS="-I/usr/local/opt/llvm/include -msse -msse2 -mcx16 -no-pie"
+  - export CPLUS_INCLUDE_PATH="/usr/local/opt/molten-vk/include"
+  - export VULKAN_SDK="/usr/local/opt/molten-vk"
+  - export VK_ICD_FILENAMES="$VULKAN_SDK/share/vulkan/icd.d/MoltenVK_icd.json"
+  - ln -s "$VULKAN_SDK/lib/libMoltenVK.dylib" "$VULKAN_SDK/lib/libvulkan.dylib"
+  
+script:
+  - mkdir rpcs3_build && cd rpcs3_build
+  - cmake -DUSE_DISCORD_RPC=OFF -DUSE_VULKAN=ON -DUSE_ALSA=OFF -DUSE_PULSE=OFF -DUSE_AUDIOUNIT=ON -G Ninja -DLLVM_CCACHE_BUILD=OFF -DLLVM_TARGETS_TO_BUILD="X86" -DLLVM_BUILD_RUNTIME=OFF -DLLVM_BUILD_TOOLS=OFF -DLLVM_INCLUDE_DOCS=OFF -DLLVM_INCLUDE_EXAMPLES=OFF -DLLVM_INCLUDE_TESTS=OFF -DLLVM_INCLUDE_TOOLS=OFF -DLLVM_INCLUDE_UTILS=OFF -DLLVM_USE_PERF=OFF -DLLVM_ENABLE_Z3_SOLVER=OFF -DCMAKE_CXX_STANDARD=20 -DUSE_NATIVE_INSTRUCTIONS=OFF ../rpcs3/
+  - ninja
+  
+branches:
+  only:
+  - master
